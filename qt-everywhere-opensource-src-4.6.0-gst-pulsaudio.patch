@@ -1,0 +1,60 @@
+diff -up qt-everywhere-opensource-src-4.6.0/src/3rdparty/phonon/gstreamer/audiooutput.cpp.gst-pulsaudio qt-everywhere-opensource-src-4.6.0/src/3rdparty/phonon/gstreamer/audiooutput.cpp
+--- qt-everywhere-opensource-src-4.6.0/src/3rdparty/phonon/gstreamer/audiooutput.cpp.gst-pulsaudio	2009-11-27 02:27:50.000000000 +0100
++++ qt-everywhere-opensource-src-4.6.0/src/3rdparty/phonon/gstreamer/audiooutput.cpp	2009-12-01 13:36:43.000000000 +0100
+@@ -148,7 +148,9 @@ bool AudioOutput::setOutputDevice(int ne
+         // Save previous state
+         GstState oldState = GST_STATE(m_audioSink);
+         const QByteArray oldDeviceValue = GstHelper::property(m_audioSink, "device");
+-        const QByteArray deviceId = deviceList.at(deviceIdx).gstId;
++        const QByteArray deviceId = (deviceList.at(deviceIdx).gstId == "PulseAudio"
++                                    ? "default"
++                                    : deviceList.at(deviceIdx).gstId);
+         m_device = newDevice;
+ 
+         // We test if the device can be opened by checking if it can go from NULL to READY state
+diff -up qt-everywhere-opensource-src-4.6.0/src/3rdparty/phonon/gstreamer/devicemanager.cpp.gst-pulsaudio qt-everywhere-opensource-src-4.6.0/src/3rdparty/phonon/gstreamer/devicemanager.cpp
+--- qt-everywhere-opensource-src-4.6.0/src/3rdparty/phonon/gstreamer/devicemanager.cpp.gst-pulsaudio	2009-11-27 02:27:50.000000000 +0100
++++ qt-everywhere-opensource-src-4.6.0/src/3rdparty/phonon/gstreamer/devicemanager.cpp	2009-12-01 13:04:18.000000000 +0100
+@@ -50,6 +50,8 @@ AudioDevice::AudioDevice(DeviceManager *
+     //get name from device
+     if (gstId == "default") {
+         description = "Default audio device";
++    } else if (gstId == "PulseAudio") {
++        description = QObject::tr("Pass all audio through the PulseAudio Sound Server.\n").toUtf8();
+     } else {
+         GstElement *aSink= manager->createAudioSink();
+ 
+@@ -178,6 +180,18 @@ GstElement *DeviceManager::createAudioSi
+                 }
+             }
+ 
++            if (!sink) {
++                sink = gst_element_factory_make ("pulsesink", NULL);
++                if (canOpenDevice(sink)) {
++                    m_backend->logMessage("AudioOutput using pulse audio sink");
++                    m_audioSink = "pulsesink";
++                }
++                else if (sink) {
++                    gst_object_unref(sink);
++                    sink = 0;
++                }
++            }
++
+ #ifdef USE_ALSASINK2
+             if (!sink) {
+                 sink = gst_element_factory_make ("_k_alsasink", NULL);
+@@ -311,8 +325,12 @@ void DeviceManager::updateDeviceList()
+     QList<QByteArray> list;
+ 
+     if (audioSink) {
+-        list = GstHelper::extractProperties(audioSink, "device");
+-        list.prepend("default");
++        if (m_audioSink == "pulsesink") {
++            list.append("PulseAudio");
++        } else {
++            list = GstHelper::extractProperties(audioSink, "device");
++            list.prepend("default");
++        }
+ 
+         for (int i = 0 ; i < list.size() ; ++i) {
+             QByteArray gstId = list.at(i);

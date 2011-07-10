@@ -1,0 +1,48 @@
+diff -up qt-everywhere-opensource-src-4.6.2/src/3rdparty/javascriptcore/JavaScriptCore/wtf/Platform.h.s390x-FTBFS qt-everywhere-opensource-src-4.6.2/src/3rdparty/javascriptcore/JavaScriptCore/wtf/Platform.h
+--- qt-everywhere-opensource-src-4.6.2/src/3rdparty/javascriptcore/JavaScriptCore/wtf/Platform.h.s390x-FTBFS	2010-02-11 16:55:20.000000000 +0100
++++ qt-everywhere-opensource-src-4.6.2/src/3rdparty/javascriptcore/JavaScriptCore/wtf/Platform.h	2010-03-23 14:29:41.000000000 +0100
+@@ -345,6 +345,11 @@
+ #define WTF_PLATFORM_BIG_ENDIAN 1
+ #endif
+ 
++/* PLATFORM(S390X) */
++#if defined(__s390x__) || defined(__s390x)
++#define WTF_PLATFORM_S390X 1
++#endif
++
+ /* PLATFORM(IA64) */
+ /* a.k.a. Itanium Processor Family, IPF */
+ #if defined(__ia64) || defined(__ia64__) || defined(_M_IA64)
+@@ -730,6 +735,8 @@
+ /* Using JSVALUE32_64 causes padding/alignement issues for JITStubArg
+ on MinGW. See https://bugs.webkit.org/show_bug.cgi?id=29268 */
+ #define WTF_USE_JSVALUE32 1
++#elif PLATFORM(S390X)
++#define WTF_USE_JSVALUE64 1
+ #else
+ #define WTF_USE_JSVALUE32_64 1
+ #endif
+diff -up qt-everywhere-opensource-src-4.6.2/src/3rdparty/webkit/JavaScriptCore/wtf/Platform.h.s390x-FTBFS qt-everywhere-opensource-src-4.6.2/src/3rdparty/webkit/JavaScriptCore/wtf/Platform.h
+--- qt-everywhere-opensource-src-4.6.2/src/3rdparty/webkit/JavaScriptCore/wtf/Platform.h.s390x-FTBFS	2010-02-11 16:55:17.000000000 +0100
++++ qt-everywhere-opensource-src-4.6.2/src/3rdparty/webkit/JavaScriptCore/wtf/Platform.h	2010-03-23 14:19:00.000000000 +0100
+@@ -362,6 +362,11 @@
+ #define WTF_PLATFORM_IA64 1
+ #endif
+ 
++/* PLATFORM(S390X) */
++#if defined(__s390x__) || defined(__s390x)
++#define WTF_PLATFORM_S390X 1
++#endif
++
+ /* PLATFORM(ALPHA) */
+ #if defined(__alpha__)
+ #define WTF_PLATFORM_ALPHA 1
+@@ -729,7 +734,7 @@
+ #endif
+ 
+ #if !defined(WTF_USE_JSVALUE64) && !defined(WTF_USE_JSVALUE32) && !defined(WTF_USE_JSVALUE32_64)
+-#if (PLATFORM(X86_64) && (PLATFORM(UNIX) || PLATFORM(WIN_OS))) || PLATFORM(IA64) || PLATFORM(ALPHA)
++#if (PLATFORM(X86_64) && (PLATFORM(UNIX) || PLATFORM(WIN_OS))) || PLATFORM(IA64) || PLATFORM(ALPHA) || PLATFORM(S390X)
+ #define WTF_USE_JSVALUE64 1
+ #elif PLATFORM(ARM) || PLATFORM(PPC64)
+ #define WTF_USE_JSVALUE32 1

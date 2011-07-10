@@ -1,0 +1,43 @@
+diff -up qt-x11-opensource-src-4.5.2/src/3rdparty/phonon/phonon/globalconfig.cpp.phonon-pulseaudio qt-x11-opensource-src-4.5.2/src/3rdparty/phonon/phonon/globalconfig.cpp
+--- qt-x11-opensource-src-4.5.2/src/3rdparty/phonon/phonon/globalconfig.cpp.phonon-pulseaudio	2009-06-20 06:57:54.000000000 +0200
++++ qt-x11-opensource-src-4.5.2/src/3rdparty/phonon/phonon/globalconfig.cpp	2009-08-21 00:11:55.000000000 +0200
+@@ -31,6 +31,7 @@
+ #include "phononnamespace_p.h"
+ 
+ #include <QtCore/QList>
++#include <QtCore/QHash>
+ #include <QtCore/QVariant>
+ 
+ QT_BEGIN_NAMESPACE
+@@ -167,6 +168,15 @@ QList<int> GlobalConfig::audioOutputDevi
+                     | ((override & HideUnavailableDevices) ? FilterUnavailableDevices : 0)
+                     );
+         }
++        // make PulseAudio the global default (assume it is already default in this list)
++        if (!list.isEmpty()) {
++            int firstIndex = list.first();
++            if (backendIface->objectDescriptionProperties(Phonon::AudioOutputDeviceType,
++                  firstIndex)["name"].toString() == "PulseAudio") {
++                list.removeFirst();
++                defaultList.prepend(firstIndex);
++            }
++        }
+         defaultList += list;
+     }
+ 
+@@ -222,6 +232,15 @@ QList<int> GlobalConfig::audioCaptureDev
+                     | ((override & HideUnavailableDevices) ? FilterUnavailableDevices : 0)
+                   );
+         }
++        // make PulseAudio the global default (assume it is already default in this list)
++        if (!list.isEmpty()) {
++            int firstIndex = list.first();
++            if (backendIface->objectDescriptionProperties(Phonon::AudioCaptureDeviceType,
++                  firstIndex)["name"].toString() == "PulseAudio") {
++                list.removeFirst();
++                defaultList.prepend(firstIndex);
++            }
++        }
+         defaultList += list;
+     }
+ 

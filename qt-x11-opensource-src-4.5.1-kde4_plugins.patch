@@ -1,0 +1,19 @@
+diff -up qt-x11-opensource-src-4.5.1/src/corelib/kernel/qcoreapplication.cpp.kde4_plugins qt-x11-opensource-src-4.5.1/src/corelib/kernel/qcoreapplication.cpp
+--- qt-x11-opensource-src-4.5.1/src/corelib/kernel/qcoreapplication.cpp.kde4_plugins	2009-04-21 18:57:41.000000000 -0500
++++ qt-x11-opensource-src-4.5.1/src/corelib/kernel/qcoreapplication.cpp	2009-05-06 13:53:40.258081854 -0500
+@@ -2061,6 +2061,15 @@ QStringList QCoreApplication::libraryPat
+                 app_libpaths->append(installPathPlugins);
+         }
+ 
++        // hack in support for kde4 plugin paths -- Rex
++        QString kde4PathPlugins = QLibraryInfo::location(QLibraryInfo::LibrariesPath) + QLatin1String("/kde4/plugins");
++        if (QFile::exists(kde4PathPlugins)) {
++            // Make sure we convert from backslashes to slashes.
++            // kde4PathPlugins = QDir(kde4PathPlugins).canonicalPath();
++            if (!app_libpaths->contains(kde4PathPlugins))
++                app_libpaths->append(kde4PathPlugins);
++        }
++
+         // If QCoreApplication is not yet instantiated,
+         // make sure we add the application path when we construct the QCoreApplication
+         if (self) self->d_func()->appendApplicationPathToLibraryPaths();
